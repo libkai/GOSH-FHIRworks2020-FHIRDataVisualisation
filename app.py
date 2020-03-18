@@ -5,7 +5,7 @@ import time
 
 app = Flask(__name__)
 
-fhir = FHIR('https://localhost:5001/api/', verify_ssl=False)
+fhir = FHIR()
 
 @app.route('/')
 def index():

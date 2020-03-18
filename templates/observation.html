@@ -6,8 +6,20 @@
 
 {% block body %}
 <h3>Observations for {{patient.name.full_name}}</h3>
-<h5>Patient ID: {{patient.uuid}}</h5>
-<h5>Patient Gender: {{patient.gender}}</h5>
+<br>
+<div class="row">
+    <div class ="col-xl-6">
+        <h5>Patient ID: {{patient.uuid}}</h5>
+        <h5>Patient Gender: {{patient.gender}}</h5>
+        <h5>Birth Date: {{patient.birth_date}}</h5>
+        <h5>Marital Status: {{patient.marital_status}}</h5>
+    </div>
+    <div class ="col-xl-6">
+        <h5>Address: {{patient.addresses[0].full_address}}</h5>
+        <h5>Telecoms: {{patient.telecoms[0].number}}</h5>
+        <h5>Languages: {{patient.communications.languages}}</h5>
+    </div>
+</div>
 <div class="row">
     <div class="col-xl-6">
         <div class="card">
