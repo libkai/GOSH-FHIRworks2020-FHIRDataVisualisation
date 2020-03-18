@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<h3>Observations for {{patient.name.full_name}}</h3>
+<h5>Patient ID: {{patient.uuid}}</h5>
+<h5>Patient Gender: {{patient.gender}}</h5>
+<div class="row">
+    <div class="col-xl-6">
+        <div class="card">
+            <div class="card-header font-weight-bold">
+                <h5>Blood Pressure</h5>
+            </div>
+            <div class="card-body">
+                <div class="container" style="position: relative; height: 40vh">
+                    <canvas id="bloodPressureChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="card">
+            <div class="card-header font-weight-bold">
+                <h5>BMI and Measurements</h5>
+            </div>
+            <div class="card-body">
+                <div class="container" style="position: relative; height: 40vh">
+                    <canvas id="bmiChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<br>
+
+<div class="row">
+    <div class="col-xl-6">
+        <div class="card">
+            <div class="card-header font-weight-bold">
+                <h5>Pain Severity Score</h5>
+            </div>
+            <div class="card-body">
+                <div class="container" style="position: relative; height: 40vh">
+                    <canvas id="painChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="card">
+            <div class="card-header font-weight-bold">
+                <h5>Mean Concentrations</h5>
+            </div>
+            <div class="card-body">
+                <div class="container" style="position: relative; height: 40vh">
+                    <canvas id="mcChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    var timeFormat = "MMM Do YY";
+
+    var dates = "{{ bloodPressureDict.date }}".slice(1,-1).replace(/\s/g, '').split(',');
+    for (i in dates) {
+        dates[i] = new Date(parseInt(dates[i]))
+    };
+
+    var bodyDates = "{{ bodyDict.date }}".slice(1,-1).replace(/\s/g, '').split(',');
+    for (i in bodyDates) {
+        bodyDates[i] = new Date(parseInt(bodyDates[i]))
+    };
+
+    var painDates = "{{ painSeverityDict.date }}".slice(1,-1).replace(/\s/g, '').split(',');
+    for (i in painDates) {
+        painDates[i] = new Date(parseInt(painDates[i]))
+    };
+
+    var meanConcDates = "{{ meanConcentrationDict.date }}".slice(1,-1).replace(/\s/g, '').split(',');
+    for (i in meanConcDates) {
+        meanConcDates[i] = new Date(parseInt(meanConcDates[i]))
+    };
+
+    function dataStringToArray(s) {
+        var final = s.slice(1,-1).replace(/\s/g, '').split(',');
+        for (i in final) {
+            final[i] = parseInt(final[i])
+        };
+        return final
+    };
+
+    var bloodPressureChart = document.getElementById('bloodPressureChart').getContext("2d");
+
+    var bmiChart = document.getElementById('bmiChart').getContext("2d");
+
+    var painChart = document.getElementById('painChart').getContext("2d");
+
+    var mcChart = document.getElementById('mcChart').getContext("2d");
+
+    var finalBloodPressureChart = new Chart(bloodPressureChart,{
+        type: 'line',
+        data:{
+            labels: dates,
+            datasets:[{
+                label: "Blood Pressure",
+                backgroundColor: "#115DA8",
+                borderColor: "#115DA8",
+                fill: false,
+                data: dataStringToArray("{{ bloodPressureDict.bloodPressure }}"),
+            }, {
+                label: "Diastolic Blood Pressure",
+                backgroundColor: "#B4151C",
+                borderColor: "#B4151C",
+                fill: false,
+                data: dataStringToArray("{{ bloodPressureDict.diastolicBloodPressure }}"),
+            }, {
+                label: "Systolic Blood Pressure",
+                backgroundColor: "#626F78",
+                borderColor: "#626F78",
+                fill: false,
+                data: dataStringToArray("{{ bloodPressureDict.systolicBloodPressure }}"),
+            }
+            ],
+        },
+        options:{
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    type: "time",
+                    time: {
+                        parser: timeFormat,
+                        tooltipFormat: "ll",
+                    },
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Date",
+                    }
+                }],
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Value in mm[Hg]"
+                    }
+                }]
+            }
+        },
+    });
+
+    var finalBMIChart = new Chart(bmiChart,{
+        type: 'line',
+        data:{
+            labels: bodyDates,
+            datasets:[{
+                label: "Body Height (cm)",
+                backgroundColor: "#115DA8",
+                borderColor: "#115DA8",
+                fill: false,
+                data: dataStringToArray("{{ bodyDict.height }}"),
+            }, {
+                label: "Body Weight (kg)",
+                backgroundColor: "#B4151C",
+                borderColor: "#B4151C",
+                fill: false,
+                data: dataStringToArray("{{ bodyDict.weight }}"),
+            }, {
+                label: "Body Mass Index (kg/\u33A1)",
+                backgroundColor: "#626F78",
+                borderColor: "#626F78",
+                fill: false,
+                data: dataStringToArray("{{ bodyDict.bmi }}"),
+            }
+            ],
+        },
+        options:{
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    type: "time",
+                    time: {
+                        parser: timeFormat,
+                        tooltipFormat: "ll",
+                    },
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Date",
+                    }
+                }],
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Value"
+                    }
+                }]
+            }
+        },
+    });
+
+    var finalPainChart = new Chart(painChart,{
+        type: 'line',
+        data:{
+            labels: painDates,
+            datasets:[{
+                label: "Pain Severity [Score]",
+                backgroundColor: "#B4151C",
+                borderColor: "#B4151C",
+                fill: false,
+                data: dataStringToArray("{{ painSeverityDict.score }}"),
+            }],
+        },
+        options:{
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    type: "time",
+                    time: {
+                        parser: timeFormat,
+                        tooltipFormat: "ll",
+                    },
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Date",
+                    }
+                }],
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Value"
+                    }
+                }]
+            }
+        },
+    });
+
+    var finalMCChart = new Chart(mcChart,{
+        type: 'line',
+        data:{
+            labels: meanConcDates,
+            datasets:[{
+                label: "MCH (pg)",
+                backgroundColor: "#115DA8",
+                borderColor: "#115DA8",
+                fill: false,
+                data: dataStringToArray("{{ meanConcentrationDict.mch }}"),
+            }, {
+                label: "MCHC (g/dL)",
+                backgroundColor: "#B4151C",
+                borderColor: "#B4151C",
+                fill: false,
+                data: dataStringToArray("{{ meanConcentrationDict.mchc }}"),
+            }, {
+                label: "MCV (fL)",
+                backgroundColor: "#626F78",
+                borderColor: "#626F78",
+                fill: false,
+                data: dataStringToArray("{{ meanConcentrationDict.mcv }}"),
+            }
+            ],
+        },
+        options:{
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    type: "time",
+                    time: {
+                        parser: timeFormat,
+                        tooltipFormat: "ll",
+                    },
+                    scaleLabel: {
+                        display: true,
+                        labelString: "Date",
+                    }
+                }],
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: "[Mass/Volume] by Automated Count"
+                    }
+                }]
+            }
+        },
+    });
+</script>
+{% endblock %}
